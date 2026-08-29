@@ -1,0 +1,131 @@
+import { Metadata } from 'next';
+import { prisma } from '@/lib/database';
+import { Button } from '@/components/ui/button';
+import { Code, Server, Gamepad2, Github, Youtube, Discord, X, Mail, Heart } from 'lucide-react';
+import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'About — SubhanPlays',
+  description: 'Learn more about SubhanPlays — Minecraft creator, developer, and technology enthusiast.',
+};
+
+async function getAboutSettings() {
+  const settings = await prisma.siteSetting.findMany({
+    where: { key: { in: ['about_title', 'about_text', 'about_image', 'stats'] } },
+  });
+  return Object.fromEntries(settings.map(s => [s.key, s.value]));
+}
+
+export default async function AboutPage() {
+  const settings = await getAboutSettings();
+  
+  const stats = (settings.stats as Array<{ label: string; value: string }>) ?? [
+    { label: 'Videos', value: '100+' },
+    { label: 'Projects', value: '20+' },
+    { label: 'Subscribers', value: '10K+' },
+    { label: 'Years Active', value: '5+' },
+  ];
+
+  const topics = [
+    { icon: Gamepad2, title: 'Minecraft & Gaming', desc: 'Custom servers, plugins, modpacks, and gaming content creation.' },
+    { icon: Code, title: 'Software Development', desc: 'Full-stack web apps, CLI tools, libraries, and open source contributions.' },
+    { icon: Server, title: 'Infrastructure & Hosting', desc: 'Linux systems, containerization, cloud architecture, and game server hosting.' },
+  ];
+
+  return (
+    <div className="py-12">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-16 text-center">
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight font-display">About</h1>
+          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+            Hi, I'm Subhan. I create content around Minecraft, coding, and technology.
+          </p>
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-2 mb-16">
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold tracking-tight">Who Am I?</h2>
+            <div className="prose prose-invert max-w-none space-y-4">
+              <p>
+                I'm a Minecraft creator, developer, and technology enthusiast. My journey started with playing Minecraft,
+                which led me to server administration, plugin development, and eventually full-stack software development.
+              </p>
+              <p>
+                Today, I build hosting panels, developer tools, infrastructure automation, and share my learnings through
+                videos and open source projects. My focus is on creating practical solutions for real problems.
+              </p>
+              <p>
+                When I'm not coding, you'll find me experimenting with new technologies, optimizing server performance,
+                or planning the next big project.
+              </p>
+            </div>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-8">
+            <h3 className="font-semibold mb-4">What I Work With</h3>
+            <div className="space-y-4">
+              {topics.map((topic) => (
+                <div key={topic.title} className="flex gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <topic.icon className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">{topic.title}</h4>
+                    <p className="text-sm text-muted-foreground">{topic.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-16">
+          {stats.map((stat, i) => (
+            <div key={i} className="text-center p-6 rounded-xl border border-border bg-card">
+              <div className="text-3xl sm:text-4xl font-bold font-display">{stat.value}</div>
+              <div className="mt-1 text-sm text-muted-foreground">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold tracking-tight mb-6 text-center">Connect With Me</h2>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <a href="https://www.youtube.com/@NotSubhanplayz" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors">
+              <Youtube className="h-5 w-5" />
+              YouTube
+            </a>
+            <a href="https://github.com/SubhanPlays" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors">
+              <Github className="h-5 w-5" />
+              GitHub
+            </a>
+            <a href="https://discord.gg/subhanplays" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors">
+              <Discord className="h-5 w-5" />
+              Discord
+            </a>
+            <a href="https://x.com/NotSubhanplayz" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors">
+              <X className="h-5 w-5" />
+              X (Twitter)
+            </a>
+            <a href="mailto:contact@subhanplays.qzz.io" className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors">
+              <Mail className="h-5 w-5" />
+              Email
+            </a>
+          </div>
+        </div>
+
+        <div className="text-center py-8 border-t border-border">
+          <p className="text-muted-foreground">
+            Built with{' '}
+            <a href="https://nextjs.org" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Next.js</a>
+            {' '},{' '}
+            <a href="https://tailwindcss.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Tailwind CSS</a>
+            {' '},{' '}
+            <a href="https://www.typescriptlang.org" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">TypeScript</a>
+            {' '}and{' '}
+            <Heart className="inline h-4 w-4 text-red-500" />
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}

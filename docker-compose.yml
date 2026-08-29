@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: subhanplays-db
+    environment:
+      POSTGRES_DB: subhanplays
+      POSTGRES_USER: subhanplays
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U subhanplays -d subhanplays"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: subhanplays-app
+    environment:
+      DATABASE_URL: postgresql://subhanplays:${DB_PASSWORD}@postgres:5432/subhanplays?schema=public
+      NODE_ENV: production
+      SESSION_SECRET: ${SESSION_SECRET}
+      PUBLIC_URL: https://subhanplays.qzz.io
+      DISCORD_ADMIN_WEBHOOK_URL: ${DISCORD_ADMIN_WEBHOOK_URL}
+      ADMIN_KEY_ROTATION_HOURS: 24
+      ADMIN_KEY_LENGTH: 32
+      ADMIN_SESSION_DURATION: 12h
+      ADMIN_AUTH_MAX_ATTEMPTS: 5
+      ADMIN_AUTH_LOCKOUT_MINUTES: 15
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY}
+      STORAGE_PATH: /app/storage
+      BACKUP_PATH: /app/backups
+    volumes:
+      - ./storage:/app/storage
+      - ./backups:/app/backups
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  nginx:
+    image: nginx:alpine
+    container_name: subhanplays-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    depends_on:
+      - nextjs
+    restart: unless-stopped
+
+  certbot:
+    image: certbot/certbot
+    container_name: subhanplays-certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+volumes:
+  postgres_data:

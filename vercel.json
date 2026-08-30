@@ -1,0 +1,10 @@
+{
+  "headers": [
+    {
+      "source": "/panel-x7Kp92mQ4vL8/:path*",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    }
+  ]
+}

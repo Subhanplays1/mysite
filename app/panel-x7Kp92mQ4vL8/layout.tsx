@@ -50,7 +50,7 @@ const sidebarItems = [
   ]},
 ];
 
-export function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set(['CONTENT', 'PROJECTS', 'WEBSITE', 'ANALYTICS', 'DISCORD', 'SECURITY', 'SYSTEM']));

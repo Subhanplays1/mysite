@@ -3,11 +3,11 @@ import { cookies } from 'next/headers';
 import { prisma } from './database';
 
 const SESSION_SECRET = new TextEncoder().encode(
-  process.env.SESSION_SECRET ?? 'dev-secret-change-in-production'
+  process.env.SESSION_SECRET || 'dev-secret-change-in-production'
 );
 
 const SESSION_COOKIE_NAME = 'sp_admin_session';
-const SESSION_DURATION = process.env.ADMIN_SESSION_DURATION ?? '12h';
+const SESSION_DURATION = process.env.ADMIN_SESSION_DURATION || '12h';
 
 export interface SessionPayload {
   userId: string;
@@ -97,7 +97,7 @@ async function hashKey(key: string): Promise<string> {
 }
 
 export async function generateAdminKey(): Promise<string> {
-  const length = parseInt(process.env.ADMIN_KEY_LENGTH ?? '32', 10) || 32;
+  const length = parseInt(process.env.ADMIN_KEY_LENGTH || '32', 10) || 32;
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let key = 'SP-';
   const randomBytes = crypto.getRandomValues(new Uint8Array(length));
@@ -109,7 +109,7 @@ export async function generateAdminKey(): Promise<string> {
 
 export async function storeAdminKey(key: string, createdBy?: string): Promise<void> {
   const keyHash = await hashKey(key);
-  const rotationHours = parseInt(process.env.ADMIN_KEY_ROTATION_HOURS ?? '24', 10) || 24;
+  const rotationHours = parseInt(process.env.ADMIN_KEY_ROTATION_HOURS || '24', 10) || 24;
   const expiresAt = new Date(Date.now() + rotationHours * 60 * 60 * 1000);
 
   await prisma.adminAuthKey.updateMany({

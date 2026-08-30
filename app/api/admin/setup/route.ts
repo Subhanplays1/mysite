@@ -33,8 +33,8 @@ export async function POST() {
     const key = await generateAdminKey();
     await storeAdminKey(key, adminUser.id);
 
-    const siteUrl = process.env.SITE_URL ?? 'http://localhost:3000';
-    const adminRoute = process.env.ADMIN_ROUTE ?? '/panel-x7Kp92mQ4vL8';
+    const siteUrl = process.env.SITE_URL || 'http://localhost:3000';
+    const adminRoute = process.env.ADMIN_ROUTE || '/panel-x7Kp92mQ4vL8';
     const adminUrl = `${siteUrl}${adminRoute}`;
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 

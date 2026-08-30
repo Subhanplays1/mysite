@@ -4,10 +4,10 @@ import { existsSync } from 'fs';
 import { prisma } from './database';
 import { formatBytes } from './utils';
 
-const STORAGE_ROOT = process.env.STORAGE_PATH ?? './storage';
+const STORAGE_ROOT = process.env.STORAGE_PATH || './storage';
 const PROJECTS_STORAGE = join(STORAGE_ROOT, 'projects');
 const MEDIA_STORAGE = join(STORAGE_ROOT, 'media');
-const BACKUPS_STORAGE = process.env.BACKUP_PATH ?? './backups';
+const BACKUPS_STORAGE = process.env.BACKUP_PATH || './backups';
 
 export async function ensureStorageDirectories(): Promise<void> {
   await mkdir(PROJECTS_STORAGE, { recursive: true });

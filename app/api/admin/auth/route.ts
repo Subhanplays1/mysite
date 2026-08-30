@@ -3,10 +3,10 @@ import { generateAdminKey, storeAdminKey } from '@/lib/auth';
 import { getActiveAdminKey } from '@/lib/auth';
 import { sendSecurityAlert, sendAdminKeyNotification } from '@/lib/discord';
 
-const SITE_URL = process.env.SITE_URL ?? 'http://localhost:3000';
+const SITE_URL = process.env.SITE_URL || 'http://localhost:3000';
 
 function getAdminRoute(): string {
-  return process.env.ADMIN_ROUTE ?? '/panel-x7Kp92mQ4vL8';
+  return process.env.ADMIN_ROUTE || '/panel-x7Kp92mQ4vL8';
 }
 
 export async function GET() {

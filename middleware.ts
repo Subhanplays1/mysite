@@ -7,7 +7,7 @@ const ADMIN_PANEL_PATH = '/panel-x7Kp92mQ4vL8';
 const ADMIN_LOGIN_PATH = `${ADMIN_PANEL_PATH}/login`;
 
 const SESSION_SECRET = new TextEncoder().encode(
-  process.env.SESSION_SECRET ?? 'dev-secret-change-in-production'
+  process.env.SESSION_SECRET || 'dev-secret-change-in-production'
 );
 
 export async function middleware(request: NextRequest) {

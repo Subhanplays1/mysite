@@ -1,25 +1,15 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getSession } from './lib/auth';
-import { checkRateLimit, recordFailedAttempt, recordSuccessfulAttempt } from './lib/security';
-import { prisma } from './lib/database';
+import { jwtVerify } from 'jose';
 
 const ADMIN_ROUTE_PREFIX = '/panel-';
 
+const SESSION_SECRET = new TextEncoder().encode(
+  process.env.SESSION_SECRET ?? 'dev-secret-change-in-production'
+);
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
-  const userAgent = request.headers.get('user-agent') ?? 'unknown';
-
-  if (pathname.startsWith('/api/admin/auth')) {
-    const rateLimit = await checkRateLimit(ip);
-    if (!rateLimit.allowed) {
-      return NextResponse.json(
-        { error: 'Too many attempts', retryAfter: rateLimit.resetAt },
-        { status: 429, headers: { 'Retry-After': String(Math.ceil((rateLimit.resetAt! - Date.now()) / 1000)) } }
-      );
-    }
-  }
 
   const isAdminRoute = pathname.startsWith(ADMIN_ROUTE_PREFIX);
   const isAdminApiRoute = pathname.startsWith('/api/admin');
@@ -30,39 +20,32 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    const session = await getSession();
-    
-    if (!session) {
+    const token = request.cookies.get('sp_admin_session')?.value;
+
+    if (!token) {
       if (isAdminApiRoute) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
-      
       const loginUrl = new URL(`${ADMIN_ROUTE_PREFIX}login`, request.url);
       loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
     }
 
-    const adminUser = await prisma.adminUser.findUnique({
-      where: { id: session.userId },
-    });
-
-    if (!adminUser) {
+    try {
+      const { payload } = await jwtVerify(token, SESSION_SECRET);
+      const requestHeaders = new Headers(request.headers);
+      requestHeaders.set('x-admin-user-id', payload.userId as string);
+      requestHeaders.set('x-admin-role', payload.role as string);
+      requestHeaders.set('x-admin-permissions', (payload.permissions as string[]).join(','));
+      return NextResponse.next({ request: { headers: requestHeaders } });
+    } catch {
       if (isAdminApiRoute) {
-        return NextResponse.json({ error: 'User not found' }, { status: 401 });
+        return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
       }
-      return NextResponse.redirect(new URL(`${ADMIN_ROUTE_PREFIX}login`, request.url));
+      const loginUrl = new URL(`${ADMIN_ROUTE_PREFIX}login`, request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
     }
-
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-admin-user-id', session.userId);
-    requestHeaders.set('x-admin-role', session.role);
-    requestHeaders.set('x-admin-permissions', session.permissions.join(','));
-
-    return NextResponse.next({ request: { headers: requestHeaders } });
-  }
-
-  if (pathname === '/api/analytics/track') {
-    return NextResponse.next();
   }
 
   return NextResponse.next();
@@ -72,6 +55,5 @@ export const config = {
   matcher: [
     '/panel-:path*',
     '/api/admin/:path*',
-    '/api/analytics/track',
   ],
 };

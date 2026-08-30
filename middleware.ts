@@ -16,10 +16,11 @@ export async function middleware(request: NextRequest) {
   const isAdminRoute = pathname.startsWith(ADMIN_ROUTE_PREFIX);
   const isAdminApiRoute = pathname.startsWith('/api/admin');
   const isAuthRoute = pathname.startsWith('/api/admin/auth');
+  const isSetupRoute = pathname === '/api/admin/setup';
   const isLoginPage = pathname === ADMIN_LOGIN_PATH;
 
   if (isAdminRoute || isAdminApiRoute) {
-    if (isAuthRoute || isLoginPage) {
+    if (isAuthRoute || isSetupRoute || isLoginPage) {
       return NextResponse.next();
     }
 

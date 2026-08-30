@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import {
   Card, CardContent, CardHeader, CardTitle,
@@ -11,13 +12,13 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Search, Save, Loader2, Undo, Redo, ZoomIn, ZoomOut, RotateCcw, Bot, Sparkles, Trash2, Copy, Minus, Maximize2, PanTool } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import ReactFlow, { 
-  Node, Edge, 
-  addEdge, 
-  Connection, 
-  NodeTypes, 
+import {
+  ReactFlow,
+  addEdge,
+  Connection,
+  NodeTypes,
   EdgeTypes,
-  useNodesState, 
+  useNodesState,
   useEdgesState,
   useReactFlow,
   Background,
@@ -137,6 +138,21 @@ const customEdgeTypes: EdgeTypes = {
 };
 
 export default function AdminFlowchartsPage() {
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => { setMounted(true); }, []);
+
+  if (!mounted) {
+    return (
+      <div className="h-[calc(100vh-8rem)] flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  return <FlowchartsContent />;
+}
+
+function FlowchartsContent() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [showAIPanel, setShowAIPanel] = React.useState(false);

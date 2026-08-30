@@ -45,7 +45,7 @@ next-env.d.ts
 
 # Storage
 storage/
-backups/
+/backups/
 
 # Prisma
 prisma/migrations/

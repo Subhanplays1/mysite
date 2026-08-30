@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronDown, Menu, X, LayoutDashboard, Video, FolderKanban, MapPin, Megaphone, CheckSquare, GitBranch, FileText, StickyNote, GitCompare, Home, LayoutGrid, Menu as MenuIcon, Image, BarChart2, Users, MessageSquare, Shield, Server, Settings, Database, Activity, LogOut, Key, RotateCcw, Bell, Search, Command, Palette, Layers, Bug, Zap } from 'lucide-react';
+import { ChevronRight, ChevronDown, Menu, X, LayoutDashboard, Video, FolderKanban, MapPin, Megaphone, CheckSquare, GitBranch, FileText, StickyNote, GitCompare, Home, LayoutGrid, Shield, Settings, Database, LogOut, Search, Command } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -27,33 +27,20 @@ const sidebarItems = [
   { group: 'WEBSITE', items: [
     { href: '/panel-x7Kp92mQ4vL8/homepage', label: 'Homepage', icon: Home },
     { href: '/panel-x7Kp92mQ4vL8/pages', label: 'Pages', icon: LayoutGrid },
-    { href: '/panel-x7Kp92mQ4vL8/sections', label: 'Sections', icon: Layers },
-    { href: '/panel-x7Kp92mQ4vL8/media', label: 'Media', icon: Image },
-  ]},
-  { group: 'ANALYTICS', items: [
-    { href: '/panel-x7Kp92mQ4vL8/analytics', label: 'Overview', icon: BarChart2 },
-    { href: '/panel-x7Kp92mQ4vL8/analytics/visitors', label: 'Visitors', icon: Users },
-  ]},
-  { group: 'DISCORD', items: [
-    { href: '/panel-x7Kp92mQ4vL8/discord/webhook', label: 'Webhook', icon: MessageSquare },
-    { href: '/panel-x7Kp92mQ4vL8/discord/notifications', label: 'Notifications', icon: Bell },
   ]},
   { group: 'SECURITY', items: [
-    { href: '/panel-x7Kp92mQ4vL8/security/auth', label: 'Authentication', icon: Key },
-    { href: '/panel-x7Kp92mQ4vL8/security/sessions', label: 'Sessions', icon: Shield },
-    { href: '/panel-x7Kp92mQ4vL8/security/audit-logs', label: 'Audit Logs', icon: Activity },
+    { href: '/panel-x7Kp92mQ4vL8/security', label: 'Security', icon: Shield },
   ]},
   { group: 'SYSTEM', items: [
     { href: '/panel-x7Kp92mQ4vL8/settings', label: 'Settings', icon: Settings },
     { href: '/panel-x7Kp92mQ4vL8/backups', label: 'Backups', icon: Database },
-    { href: '/panel-x7Kp92mQ4vL8/health', label: 'Health', icon: Server },
   ]},
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set(['CONTENT', 'PROJECTS', 'WEBSITE', 'ANALYTICS', 'DISCORD', 'SECURITY', 'SYSTEM']));
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set(['CONTENT', 'PROJECTS', 'WEBSITE', 'SECURITY', 'SYSTEM']));
 
   if (pathname === '/panel-x7Kp92mQ4vL8/login') {
     return <>{children}</>;
@@ -120,10 +107,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         {section.group === 'CONTENT' && <Video className="h-4 w-4" />}
                         {section.group === 'PROJECTS' && <FolderKanban className="h-4 w-4" />}
                         {section.group === 'WEBSITE' && <LayoutGrid className="h-4 w-4" />}
-                        {section.group === 'ANALYTICS' && <BarChart2 className="h-4 w-4" />}
-                        {section.group === 'DISCORD' && <MessageSquare className="h-4 w-4" />}
                         {section.group === 'SECURITY' && <Shield className="h-4 w-4" />}
-                        {section.group === 'SYSTEM' && <Server className="h-4 w-4" />}
+                        {section.group === 'SYSTEM' && <Database className="h-4 w-4" />}
                         {section.group}
                       </span>
                       <ChevronDown className={cn('h-4 w-4 transition-transform', isCollapsed ? '-rotate-90' : '')} />

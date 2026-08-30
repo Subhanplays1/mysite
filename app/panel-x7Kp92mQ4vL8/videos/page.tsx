@@ -2,29 +2,42 @@
 
 import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Edit, Trash2, Eye, EyeOff, Star, StarOff, GripVertical, Loader2, Youtube, X } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, EyeOff, Star, Loader2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatRelativeTime, formatNumber } from '@/lib/utils';
 import { VideoForm } from '@/components/admin/video-form';
 
-const mockVideos = [
-  { id: '1', youtubeId: 'dQw4w9WgXcQ', title: 'Building a Minecraft Server from Scratch', thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg', category: 'Minecraft', views: 15000, publishedAt: '2024-01-15', featured: true, visible: true, sortOrder: 0 },
-  { id: '2', youtubeId: 'dQw4w9WgXcQ', title: 'React vs Vue: Which is Better?', thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg', category: 'Coding', views: 8500, publishedAt: '2024-01-10', featured: false, visible: true, sortOrder: 1 },
-  { id: '3', youtubeId: 'dQw4w9WgXcQ', title: 'Linux Server Hardening Guide', thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg', category: 'Linux', views: 12000, publishedAt: '2024-01-05', featured: false, visible: true, sortOrder: 2 },
-];
-
 export default function AdminVideosPage() {
-  const [videos, setVideos] = React.useState(mockVideos);
+  const [videos, setVideos] = React.useState<any[]>([]);
   const [search, setSearch] = React.useState('');
   const [categoryFilter, setCategoryFilter] = React.useState('all');
   const [showModal, setShowModal] = React.useState(false);
   const [editingVideo, setEditingVideo] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(false);
+  const [fetching, setFetching] = React.useState(true);
 
   const categories = ['Minecraft', 'Coding', 'Linux', 'Hosting', 'Gaming', 'Technology'];
+
+  React.useEffect(() => {
+    fetchVideos();
+  }, []);
+
+  async function fetchVideos() {
+    setFetching(true);
+    try {
+      const res = await fetch('/api/admin/videos');
+      if (res.ok) {
+        const data = await res.json();
+        setVideos(data);
+      }
+    } catch (e) {
+      console.error('Failed to fetch videos:', e);
+    }
+    setFetching(false);
+  }
 
   const filteredVideos = videos.filter(v => {
     const matchesSearch = v.title.toLowerCase().includes(search.toLowerCase());
@@ -32,7 +45,7 @@ export default function AdminVideosPage() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleAddVideo = async () => {
+  const handleAddVideo = () => {
     setEditingVideo(null);
     setShowModal(true);
   };
@@ -44,28 +57,73 @@ export default function AdminVideosPage() {
 
   const handleDeleteVideo = async (id: string) => {
     if (!confirm('Are you sure you want to delete this video?')) return;
-    setVideos(videos.filter(v => v.id !== id));
+    try {
+      const res = await fetch(`/api/admin/videos/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setVideos(videos.filter(v => v.id !== id));
+      }
+    } catch (e) {
+      console.error('Failed to delete video:', e);
+    }
   };
 
-  const handleToggleFeatured = (id: string) => {
-    setVideos(videos.map(v => v.id === id ? { ...v, featured: !v.featured } : v));
+  const handleToggleFeatured = async (video: any) => {
+    try {
+      const res = await fetch(`/api/admin/videos/${video.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ featured: !video.featured }),
+      });
+      if (res.ok) {
+        setVideos(videos.map(v => v.id === video.id ? { ...v, featured: !v.featured } : v));
+      }
+    } catch (e) {
+      console.error('Failed to update video:', e);
+    }
   };
 
-  const handleToggleVisible = (id: string) => {
-    setVideos(videos.map(v => v.id === id ? { ...v, visible: !v.visible } : v));
+  const handleToggleVisible = async (video: any) => {
+    try {
+      const res = await fetch(`/api/admin/videos/${video.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ visible: !video.visible }),
+      });
+      if (res.ok) {
+        setVideos(videos.map(v => v.id === video.id ? { ...v, visible: !v.visible } : v));
+      }
+    } catch (e) {
+      console.error('Failed to update video:', e);
+    }
   };
 
   const handleSaveVideo = async (data: any) => {
     setLoading(true);
-    await new Promise(r => setTimeout(r, 500));
-    
-    if (editingVideo) {
-      setVideos(videos.map(v => v.id === editingVideo.id ? { ...v, ...data } : v));
-    } else {
-      const newVideo = { ...data, id: Date.now().toString(), views: 0, publishedAt: new Date().toISOString().split('T')[0], sortOrder: videos.length };
-      setVideos([...videos, newVideo]);
+    try {
+      if (editingVideo) {
+        const res = await fetch(`/api/admin/videos/${editingVideo.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        if (res.ok) {
+          const updated = await res.json();
+          setVideos(videos.map(v => v.id === editingVideo.id ? updated : v));
+        }
+      } else {
+        const res = await fetch('/api/admin/videos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        if (res.ok) {
+          const newVideo = await res.json();
+          setVideos([newVideo, ...videos]);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to save video:', e);
     }
-    
     setShowModal(false);
     setLoading(false);
   };
@@ -119,78 +177,84 @@ export default function AdminVideosPage() {
       >
         <Card>
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border bg-muted/50">
-                    <th className="p-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Video</th>
-                    <th className="p-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Category</th>
-                    <th className="p-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Views</th>
-                    <th className="p-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Published</th>
-                    <th className="p-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-                    <th className="p-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Order</th>
-                    <th className="p-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <AnimatePresence mode="popLayout">
-                    {filteredVideos.map((video, index) => (
-                      <motion.tr
-                        key={video.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        transition={{ duration: 0.2 }}
-                        className="border-b border-border hover:bg-accent/50"
-                      >
-                        <td className="p-3">
-                          <div className="flex items-center gap-3">
-                            <img src={video.thumbnail} alt="" className="h-16 w-28 rounded object-cover" />
-                            <div>
-                              <p className="font-medium truncate max-w-xs">{video.title}</p>
-                              <p className="text-xs text-muted-foreground">{video.youtubeId}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="p-3">
-                          <span className="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">{video.category}</span>
-                        </td>
-                        <td className="p-3 text-sm">{formatNumber(video.views)}</td>
-                        <td className="p-3 text-sm text-muted-foreground">{formatRelativeTime(video.publishedAt)}</td>
-                        <td className="p-3">
-                          <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => handleToggleFeatured(video.id)} className={video.featured ? 'text-yellow-500' : ''}>
-                              <Star className={cn('h-4 w-4', video.featured ? 'fill-current' : '')} />
-                            </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleToggleVisible(video.id)} className={video.visible ? '' : 'text-muted-foreground'}>
-                              {video.visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                            </Button>
-                          </div>
-                        </td>
-                        <td className="p-3 text-sm text-muted-foreground">{video.sortOrder}</td>
-                        <td className="p-3 text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <Button variant="ghost" size="icon" onClick={() => handleEditVideo(video)}>
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleDeleteVideo(video.id)} className="text-destructive hover:text-destructive">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </td>
-                      </motion.tr>
-                    ))}
-                  </AnimatePresence>
-                  {filteredVideos.length === 0 && (
-                    <tr>
-                      <td colSpan={7} className="p-8 text-center text-muted-foreground">
-                        No videos found. Add your first video!
-                      </td>
+            {fetching ? (
+              <div className="flex items-center justify-center p-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/50">
+                      <th className="p-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Video</th>
+                      <th className="p-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Category</th>
+                      <th className="p-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Views</th>
+                      <th className="p-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Published</th>
+                      <th className="p-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                      <th className="p-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Order</th>
+                      <th className="p-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    <AnimatePresence mode="popLayout">
+                      {filteredVideos.map((video) => (
+                        <motion.tr
+                          key={video.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          transition={{ duration: 0.2 }}
+                          className="border-b border-border hover:bg-accent/50"
+                        >
+                          <td className="p-3">
+                            <div className="flex items-center gap-3">
+                              <img src={video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`} alt="" className="h-16 w-28 rounded object-cover" />
+                              <div>
+                                <p className="font-medium truncate max-w-xs">{video.title}</p>
+                                <p className="text-xs text-muted-foreground">{video.youtubeId}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <span className="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">{video.category || '—'}</span>
+                          </td>
+                          <td className="p-3 text-sm">{formatNumber(video.views)}</td>
+                          <td className="p-3 text-sm text-muted-foreground">{video.publishedAt ? formatRelativeTime(video.publishedAt) : '—'}</td>
+                          <td className="p-3">
+                            <div className="flex items-center gap-2">
+                              <Button variant="ghost" size="icon" onClick={() => handleToggleFeatured(video)} className={video.featured ? 'text-yellow-500' : ''}>
+                                <Star className={cn('h-4 w-4', video.featured ? 'fill-current' : '')} />
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => handleToggleVisible(video)} className={video.visible ? '' : 'text-muted-foreground'}>
+                                {video.visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                              </Button>
+                            </div>
+                          </td>
+                          <td className="p-3 text-sm text-muted-foreground">{video.sortOrder}</td>
+                          <td className="p-3 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <Button variant="ghost" size="icon" onClick={() => handleEditVideo(video)}>
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => handleDeleteVideo(video.id)} className="text-destructive hover:text-destructive">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </AnimatePresence>
+                    {filteredVideos.length === 0 && (
+                      <tr>
+                        <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                          No videos found. Add your first video!
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </CardContent>
         </Card>
       </motion.div>
@@ -215,7 +279,6 @@ export default function AdminVideosPage() {
                 <h2 className="text-xl font-bold">{editingVideo ? 'Edit Video' : 'Add Video'}</h2>
                 <Button variant="ghost" size="icon" onClick={() => setShowModal(false)}><X className="h-5 w-5" /></Button>
               </div>
-
               <VideoForm onSubmit={handleSaveVideo} initialData={editingVideo} loading={loading} onCancel={() => setShowModal(false)} />
             </motion.div>
           </motion.div>

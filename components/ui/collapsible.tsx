@@ -1,16 +1,15 @@
+'use client';
+
 import * as React from 'react';
 import * as CollapsiblePrimitive from '@radix-ui/react-collapsible';
-import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const Collapsible = CollapsiblePrimitive.Root;
-const CollapsibleTrigger = CollapsiblePrimitive.Trigger;
-const CollapsibleContent = CollapsiblePrimitive.Content;
 
 const CollapsibleTrigger = React.forwardRef<
   React.ElementRef<typeof CollapsiblePrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof CollapsiblePrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
+>(({ className, ...props }, ref) => (
   <CollapsiblePrimitive.Trigger
     ref={ref}
     className={cn(
@@ -18,10 +17,7 @@ const CollapsibleTrigger = React.forwardRef<
       className
     )}
     {...props}
-  >
-    {children}
-    <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
-  </CollapsiblePrimitive.Trigger>
+  />
 ));
 CollapsibleTrigger.displayName = CollapsiblePrimitive.Trigger.displayName;
 

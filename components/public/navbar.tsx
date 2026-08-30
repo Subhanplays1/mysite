@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { usePathname, useScroll } from '@react-hook/window-size';
+import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Youtube } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,13 +19,17 @@ const navLinks = [
 
 export function Navbar() {
   const pathname = usePathname();
-  const { scrollY } = useScroll();
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
 
   React.useEffect(() => {
-    setScrolled(scrollY > 20);
-  }, [scrollY]);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <header className={cn(

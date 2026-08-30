@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Mail, Github, Discord, X, Youtube, Send, Loader2 } from 'lucide-react';
+import { Mail, Github, X, Youtube, Send, Loader2 } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Contact — SubhanPlays',
@@ -94,9 +94,8 @@ export default function ContactPage() {
               {[
                 { icon: Youtube, label: 'YouTube', href: 'https://www.youtube.com/@NotSubhanplayz', color: 'bg-red-600' },
                 { icon: Github, label: 'GitHub', href: 'https://github.com/SubhanPlays', color: 'bg-gray-800' },
-                { icon: Discord, label: 'Discord', href: 'https://discord.gg/subhanplays', color: 'bg-[#5865F2]' },
-                { icon: X, label: 'X (Twitter)', href: 'https://x.com/NotSubhanplayz', color: 'bg-black' },
                 { icon: Mail, label: 'Email', href: 'mailto:contact@subhanplays.qzz.io', color: 'bg-blue-600' },
+                { icon: X, label: 'X (Twitter)', href: 'https://x.com/NotSubhanplayz', color: 'bg-black' },
               ].map((contact) => (
                 <a
                   key={contact.label}

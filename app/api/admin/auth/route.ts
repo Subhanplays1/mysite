@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateAdminKey, storeAdminKey, sendAdminKeyNotification } from '@/lib/auth';
+import { generateAdminKey, storeAdminKey } from '@/lib/auth';
 import { getActiveAdminKey } from '@/lib/auth';
-import { sendSecurityAlert } from '@/lib/discord';
+import { sendSecurityAlert, sendAdminKeyNotification } from '@/lib/discord';
 
 const PUBLIC_URL = process.env.PUBLIC_URL ?? 'http://localhost:3000';
 

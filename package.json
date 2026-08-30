@@ -60,6 +60,12 @@
     "youtube-dl-exec": "2.4.14",
     "zod": "3.23.8"
   },
+  "postcss": {
+    "plugins": {
+      "tailwindcss": {},
+      "autoprefixer": {}
+    }
+  },
   "devDependencies": {
     "@types/bcryptjs": "2.4.6",
     "@types/node": "22.7.5",

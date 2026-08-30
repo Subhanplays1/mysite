@@ -97,7 +97,7 @@ async function hashKey(key: string): Promise<string> {
 }
 
 export async function generateAdminKey(): Promise<string> {
-  const length = parseInt(process.env.ADMIN_KEY_LENGTH ?? '32', 10);
+  const length = parseInt(process.env.ADMIN_KEY_LENGTH ?? '32', 10) || 32;
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let key = 'SP-';
   const randomBytes = crypto.getRandomValues(new Uint8Array(length));

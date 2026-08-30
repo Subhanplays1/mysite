@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Edit, Trash2, Eye, EyeOff, Star, Loader2, X } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, EyeOff, Star, Loader2, X, RefreshCw, Check, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatRelativeTime, formatNumber } from '@/lib/utils';
 import { VideoForm } from '@/components/admin/video-form';
@@ -19,6 +19,8 @@ export default function AdminVideosPage() {
   const [loading, setLoading] = React.useState(false);
   const [fetching, setFetching] = React.useState(true);
   const [deleteId, setDeleteId] = React.useState<string | null>(null);
+  const [syncing, setSyncing] = React.useState(false);
+  const [syncResult, setSyncResult] = React.useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const categories = ['Minecraft', 'Coding', 'Linux', 'Hosting', 'Gaming', 'Technology'];
 
@@ -33,6 +35,25 @@ export default function AdminVideosPage() {
       console.error('Failed to fetch videos:', e);
     }
     setFetching(false);
+  }
+
+  async function handleSync() {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const res = await fetch('/api/admin/videos/sync', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        setSyncResult({ type: 'success', message: data.message });
+        if (data.added > 0) fetchVideos();
+      } else {
+        setSyncResult({ type: 'error', message: data.error || 'Sync failed' });
+      }
+    } catch (e) {
+      setSyncResult({ type: 'error', message: 'Network error — sync failed' });
+    }
+    setSyncing(false);
+    setTimeout(() => setSyncResult(null), 5000);
   }
 
   const filteredVideos = videos.filter(v => {
@@ -119,13 +140,39 @@ export default function AdminVideosPage() {
           <h1 className="text-3xl font-bold tracking-tight font-display">Videos</h1>
           <p className="mt-1 text-muted-foreground">Manage your YouTube videos and featured content.</p>
         </div>
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Button onClick={handleAddVideo}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Video
-          </Button>
-        </motion.div>
+        <div className="flex items-center gap-2">
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button variant="outline" onClick={handleSync} disabled={syncing}>
+              {syncing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+              {syncing ? 'Syncing...' : 'Sync from YouTube'}
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button onClick={handleAddVideo}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Video
+            </Button>
+          </motion.div>
+        </div>
       </motion.div>
+
+      <AnimatePresence>
+        {syncResult && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className={`flex items-center gap-2 px-4 py-3 rounded-lg border text-sm ${
+              syncResult.type === 'success'
+                ? 'bg-green-500/10 border-green-500/30 text-green-500'
+                : 'bg-destructive/10 border-destructive/30 text-destructive'
+            }`}
+          >
+            {syncResult.type === 'success' ? <Check className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
+            {syncResult.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">

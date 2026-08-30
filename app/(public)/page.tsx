@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Youtube, ArrowRight, Code, Server, Gamepad2 } from 'lucide-react';
 import { prisma } from '@/lib/database';
@@ -65,34 +66,22 @@ export default async function HomePage() {
         )}
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <div className="text-center max-w-4xl mx-auto">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+            <h1
               className="text-5xl sm:text-7xl lg:text-8xl font-bold tracking-tight font-display text-balance"
             >
               {heroTitle}
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
+            </h1>
+            <p
               className="mt-6 text-xl sm:text-2xl lg:text-3xl text-muted-foreground font-medium text-balance"
             >
               {heroSubtitle}
-            </motion.p>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+            </p>
+            <p
               className="mt-8 text-lg sm:text-xl text-foreground/80 max-w-2xl mx-auto text-balance"
             >
               {heroDescription}
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
+            </p>
+            <div
               className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4"
             >
               <Button asChild size="xl" className="group">
@@ -108,19 +97,16 @@ export default async function HomePage() {
                   <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </a>
               </Button>
-            </motion.div>
+            </div>
           </div>
         </div>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
+        <div
           className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce"
         >
           <svg className="h-6 w-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
-        </motion.div>
+        </div>
       </section>
 
       {featuredVideo && (

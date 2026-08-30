@@ -10,7 +10,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const { name, description, longDescription, icon, category, status, technologies, githubUrl, demoUrl, websiteUrl, featured, visibility, showOnRoadmap } = body;
+  const { name, description, longDescription, icon, coverImage, category, status, technologies, githubUrl, demoUrl, websiteUrl, featured, visibility, showOnRoadmap } = body;
 
   if (!name) {
     return NextResponse.json({ error: 'name is required' }, { status: 400 });
@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
       description: description || null,
       longDescription: longDescription || null,
       icon: icon || null,
+      coverImage: coverImage || null,
       category: category || null,
       status: status || 'IDEA',
       technologies: technologies || [],

@@ -30,6 +30,7 @@ export default function AdminProjectsPage() {
   const [editingProject, setEditingProject] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(false);
   const [fetching, setFetching] = React.useState(true);
+  const [deleteId, setDeleteId] = React.useState<string | null>(null);
 
   const statuses = ['IDEA', 'PLANNING', 'DEVELOPMENT', 'TESTING', 'BETA', 'RELEASED', 'PAUSED', 'ARCHIVED'];
   const visibilities = ['PUBLIC', 'PRIVATE', 'UNLISTED'];
@@ -42,10 +43,7 @@ export default function AdminProjectsPage() {
     setFetching(true);
     try {
       const res = await fetch('/api/admin/projects');
-      if (res.ok) {
-        const data = await res.json();
-        setProjects(data);
-      }
+      if (res.ok) setProjects(await res.json());
     } catch (e) {
       console.error('Failed to fetch projects:', e);
     }
@@ -59,26 +57,18 @@ export default function AdminProjectsPage() {
     return matchesSearch && matchesStatus && matchesVisibility;
   });
 
-  const handleAddProject = () => {
-    setEditingProject(null);
-    setShowModal(true);
-  };
-
-  const handleEditProject = (project: any) => {
-    setEditingProject(project);
-    setShowModal(true);
-  };
+  const handleAddProject = () => { setEditingProject(null); setShowModal(true); };
+  const handleEditProject = (project: any) => { setEditingProject(project); setShowModal(true); };
 
   const handleDeleteProject = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) return;
+    setDeleteId(id);
     try {
       const res = await fetch(`/api/admin/projects/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setProjects(projects.filter(p => p.id !== id));
-      }
+      if (res.ok) setProjects(projects.filter(p => p.id !== id));
     } catch (e) {
       console.error('Failed to delete project:', e);
     }
+    setDeleteId(null);
   };
 
   const handleSaveProject = async (data: any) => {
@@ -114,27 +104,20 @@ export default function AdminProjectsPage() {
 
   return (
     <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight font-display">Projects</h1>
           <p className="mt-1 text-muted-foreground">Manage your projects, workspaces, and public portfolio.</p>
         </div>
-        <Button onClick={handleAddProject}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Project
-        </Button>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Button onClick={handleAddProject}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Project
+          </Button>
+        </motion.div>
       </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="flex flex-col sm:flex-row gap-4"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Search projects..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
@@ -149,11 +132,7 @@ export default function AdminProjectsPage() {
         </select>
       </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
         <Card>
           <CardContent className="p-0">
             {fetching ? (
@@ -176,18 +155,23 @@ export default function AdminProjectsPage() {
                   </thead>
                   <tbody>
                     <AnimatePresence mode="popLayout">
-                      {filteredProjects.map((project) => (
+                      {filteredProjects.map((project, i) => (
                         <motion.tr
                           key={project.id}
+                          layout
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: 20 }}
-                          transition={{ duration: 0.2 }}
-                          className="border-b border-border hover:bg-accent/50"
+                          exit={{ opacity: 0, x: 20, transition: { duration: 0.2 } }}
+                          transition={{ duration: 0.3, delay: i * 0.03 }}
+                          className="border-b border-border hover:bg-accent/50 transition-colors"
                         >
                           <td className="p-3">
                             <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-lg">{project.icon || '📁'}</div>
+                              {project.coverImage ? (
+                                <img src={project.coverImage} alt="" className="h-10 w-10 rounded-lg object-cover" />
+                              ) : (
+                                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-lg">{project.icon || '📁'}</div>
+                              )}
                               <div>
                                 <p className="font-medium truncate max-w-xs">{project.name}</p>
                                 <p className="text-xs text-muted-foreground">{project.slug}</p>
@@ -195,7 +179,14 @@ export default function AdminProjectsPage() {
                             </div>
                           </td>
                           <td className="p-3">
-                            <span className={cn('text-xs font-medium px-2 py-1 rounded', statusColors[project.status])}>{project.status}</span>
+                            <motion.span
+                              key={project.status}
+                              initial={{ scale: 0.8, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              className={cn('text-xs font-medium px-2 py-1 rounded inline-block', statusColors[project.status])}
+                            >
+                              {project.status}
+                            </motion.span>
                           </td>
                           <td className="p-3 text-sm">{project.category || '—'}</td>
                           <td className="p-3">
@@ -210,17 +201,29 @@ export default function AdminProjectsPage() {
                           <td className="p-3 text-sm text-muted-foreground">{project.updatedAt ? formatRelativeTime(project.updatedAt) : '—'}</td>
                           <td className="p-3 text-right">
                             <div className="flex items-center justify-end gap-1">
-                              <Button variant="ghost" size="icon" asChild>
-                                <a href={`/panel-x7Kp92mQ4vL8/projects/${project.id}/workspace`}>
-                                  <FolderKanban className="h-4 w-4" />
-                                </a>
-                              </Button>
-                              <Button variant="ghost" size="icon" onClick={() => handleEditProject(project)}>
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon" onClick={() => handleDeleteProject(project.id)} className="text-destructive hover:text-destructive">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                                <Button variant="ghost" size="icon" asChild>
+                                  <a href={`/panel-x7Kp92mQ4vL8/projects/${project.id}/workspace`}>
+                                    <FolderKanban className="h-4 w-4" />
+                                  </a>
+                                </Button>
+                              </motion.div>
+                              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                                <Button variant="ghost" size="icon" onClick={() => handleEditProject(project)}>
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </motion.div>
+                              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleDeleteProject(project.id)}
+                                  disabled={deleteId === project.id}
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  {deleteId === project.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                                </Button>
+                              </motion.div>
                             </div>
                           </td>
                         </motion.tr>
@@ -228,7 +231,12 @@ export default function AdminProjectsPage() {
                     </AnimatePresence>
                     {filteredProjects.length === 0 && (
                       <tr>
-                        <td colSpan={7} className="p-8 text-center text-muted-foreground">No projects found. Create your first project!</td>
+                        <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2">
+                            <p>No projects found.</p>
+                            <Button variant="link" onClick={handleAddProject}>Create your first project</Button>
+                          </motion.div>
+                        </td>
                       </tr>
                     )}
                   </tbody>
@@ -245,14 +253,15 @@ export default function AdminProjectsPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
             onClick={() => setShowModal(false)}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-xl bg-card border border-border p-6"
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-xl bg-card border border-border p-6 shadow-2xl"
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-6">

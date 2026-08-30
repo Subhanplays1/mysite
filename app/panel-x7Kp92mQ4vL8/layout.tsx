@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronDown, Menu, X, LayoutDashboard, Video, FolderKanban, MapPin, Megaphone, CheckSquare, GitBranch, FileText, StickyNote, GitCompare, Home, LayoutGrid, Shield, Settings, Database, LogOut, Search, Command } from 'lucide-react';
+import { ChevronRight, ChevronDown, Menu, X, LayoutDashboard, Video, FolderKanban, MapPin, Megaphone, CheckSquare, GitBranch, FileText, StickyNote, GitCompare, Home, LayoutGrid, Shield, Settings, Database, LogOut, Search, Command, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';

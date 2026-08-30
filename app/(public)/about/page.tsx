@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Code, Server, Gamepad2, Github, Youtube, X, Mail, Heart } from 'lucide-react';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'About — SubhanPlays',
   description: 'Learn more about SubhanPlays — Minecraft creator, developer, and technology enthusiast.',

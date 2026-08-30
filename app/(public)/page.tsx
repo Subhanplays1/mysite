@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Youtube, ArrowRight, Code, Server, Gamepad2 } from 'lucide-react';
 import { prisma } from '@/lib/database';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'SubhanPlays — Gaming, Coding & Technology',
   description: 'SubhanPlays — Minecraft, gaming, coding, hosting, and technology. Explore videos, projects, and everything I\'m building.',

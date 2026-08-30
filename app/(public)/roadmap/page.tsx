@@ -5,6 +5,8 @@ import { Clock, CheckCircle, AlertCircle, Loader2, Code, Rocket } from 'lucide-r
 import { formatRelativeTime } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Roadmap — SubhanPlays',
   description: 'View the public roadmap for SubhanPlays projects — upcoming features, releases, and project milestones.',

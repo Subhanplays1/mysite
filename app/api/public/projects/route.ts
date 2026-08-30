@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/database';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const projects = await prisma.project.findMany({
     where: { visibility: 'PUBLIC' },

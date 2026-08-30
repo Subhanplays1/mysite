@@ -7,6 +7,8 @@ import { formatRelativeTime } from '@/lib/utils';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
+export const dynamic = 'force-dynamic';
+
 interface Props {
   params: Promise<{ slug: string }>;
 }

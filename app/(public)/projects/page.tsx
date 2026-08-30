@@ -5,6 +5,8 @@ import { Code, Github, ExternalLink, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatRelativeTime } from '@/lib/utils';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Projects — SubhanPlays',
   description: 'Explore all projects by SubhanPlays — Minecraft servers, hosting panels, developer tools, and open source software.',

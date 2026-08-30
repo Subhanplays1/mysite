@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/database';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const items = await prisma.roadmapItem.findMany({
     where: {

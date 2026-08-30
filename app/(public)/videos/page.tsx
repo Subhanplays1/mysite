@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Youtube, Loader2 } from 'lucide-react';
 import { formatNumber, formatRelativeTime } from '@/lib/utils';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Videos — SubhanPlays',
   description: 'Watch all videos from SubhanPlays — Minecraft, gaming, coding, hosting, and technology content.',

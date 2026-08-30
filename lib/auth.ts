@@ -109,7 +109,7 @@ export async function generateAdminKey(): Promise<string> {
 
 export async function storeAdminKey(key: string, createdBy?: string): Promise<void> {
   const keyHash = await hashKey(key);
-  const rotationHours = parseInt(process.env.ADMIN_KEY_ROTATION_HOURS ?? '24', 10);
+  const rotationHours = parseInt(process.env.ADMIN_KEY_ROTATION_HOURS ?? '24', 10) || 24;
   const expiresAt = new Date(Date.now() + rotationHours * 60 * 60 * 1000);
 
   await prisma.adminAuthKey.updateMany({

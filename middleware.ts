@@ -56,7 +56,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/panel-:path*',
+    '/panel-x7Kp92mQ4vL8/:path*',
     '/api/admin/:path*',
   ],
 };

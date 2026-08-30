@@ -219,7 +219,7 @@ export default function AdminProjectsPage() {
               </div>
               <ProjectForm onSubmit={handleSaveProject} initialData={editingProject} loading={loading} onCancel={() => setShowModal(false)} />
             </motion.div>
-          )
+          }
         )}
       </AnimatePresence>
     </div>

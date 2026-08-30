@@ -218,7 +218,7 @@ export default function AdminVideosPage() {
 
               <VideoForm onSubmit={handleSaveVideo} initialData={editingVideo} loading={loading} onCancel={() => setShowModal(false)} />
             </motion.div>
-          )
+          }
         )}
       </AnimatePresence>
     </div>

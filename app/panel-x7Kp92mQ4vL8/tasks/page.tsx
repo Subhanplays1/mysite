@@ -222,7 +222,7 @@ export default function AdminTasksPage() {
               </div>
               <TaskForm onSubmit={handleSaveTask} initialData={editingTask} loading={loading} onCancel={() => setShowModal(false)} />
             </motion.div>
-          )
+          }
         )}
       </AnimatePresence>
     </div>

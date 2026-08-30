@@ -3,6 +3,8 @@ import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 
 const ADMIN_ROUTE_PREFIX = '/panel-';
+const ADMIN_PANEL_PATH = '/panel-x7Kp92mQ4vL8';
+const ADMIN_LOGIN_PATH = `${ADMIN_PANEL_PATH}/login`;
 
 const SESSION_SECRET = new TextEncoder().encode(
   process.env.SESSION_SECRET ?? 'dev-secret-change-in-production'
@@ -14,9 +16,10 @@ export async function middleware(request: NextRequest) {
   const isAdminRoute = pathname.startsWith(ADMIN_ROUTE_PREFIX);
   const isAdminApiRoute = pathname.startsWith('/api/admin');
   const isAuthRoute = pathname.startsWith('/api/admin/auth');
+  const isLoginPage = pathname === ADMIN_LOGIN_PATH;
 
   if (isAdminRoute || isAdminApiRoute) {
-    if (isAuthRoute) {
+    if (isAuthRoute || isLoginPage) {
       return NextResponse.next();
     }
 
@@ -26,7 +29,7 @@ export async function middleware(request: NextRequest) {
       if (isAdminApiRoute) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
-      const loginUrl = new URL(`${ADMIN_ROUTE_PREFIX}login`, request.url);
+      const loginUrl = new URL(ADMIN_LOGIN_PATH, request.url);
       loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
     }
@@ -42,7 +45,7 @@ export async function middleware(request: NextRequest) {
       if (isAdminApiRoute) {
         return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
       }
-      const loginUrl = new URL(`${ADMIN_ROUTE_PREFIX}login`, request.url);
+      const loginUrl = new URL(ADMIN_LOGIN_PATH, request.url);
       loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
     }

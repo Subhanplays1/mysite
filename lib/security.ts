@@ -1,8 +1,8 @@
 import { prisma } from './database';
 import { sendSecurityAlert } from './discord';
 
-const MAX_ATTEMPTS = parseInt(process.env.ADMIN_AUTH_MAX_ATTEMPTS ?? '5', 10);
-const LOCKOUT_MINUTES = parseInt(process.env.ADMIN_AUTH_LOCKOUT_MINUTES ?? '15', 10);
+const MAX_ATTEMPTS = parseInt(process.env.ADMIN_AUTH_MAX_ATTEMPTS ?? '5', 10) || 5;
+const LOCKOUT_MINUTES = parseInt(process.env.ADMIN_AUTH_LOCKOUT_MINUTES ?? '15', 10) || 15;
 
 const attemptStore = new Map<string, { count: number; lockedUntil: number }>();
 

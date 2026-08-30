@@ -41,7 +41,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, key: newKey, expiresAt });
     } catch (error) {
       console.error('Key generation failed:', error);
-      return NextResponse.json({ error: 'Failed to generate key' }, { status: 500 });
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      return NextResponse.json({ error: 'Failed to generate key', details: message }, { status: 500 });
     }
   }
 
